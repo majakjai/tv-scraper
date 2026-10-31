@@ -1,0 +1,33 @@
+name: Auto Scraper
+
+on:
+  schedule:
+    # ตั้งเวลารันทุกๆ 3 ชั่วโมง (แก้เวลาได้ตามต้องการ)
+    - cron: '0 */3 * * *'
+  workflow_dispatch: # ทำให้เรากดปุ่มรันเองด้วยมือบนเว็บ GitHub ได้ตลอดเวลา
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install axios cheerio
+
+      - name: Run Script
+        run: node scraper.js
+
+      - name: Commit and Push Result
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add channels.json
+          git commit -m "Update channels.json automatically" || exit 0
+          git push
